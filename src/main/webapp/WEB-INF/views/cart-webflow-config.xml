@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+<on-start>
+		<!-- demohandler is java class available through annotated Demohandler.java 
+			class.here we are calling it’s initFlow() method. -->
+		<evaluate expression="shippinghandler.initFlow()" result="flowScope.ship" />
+	</on-start>
+
+	<!-- if not specified the first view state is the starting state -->
+	<view-state id="start" view="shipping.jsp" model="flowScope.ship">
+		<transition on="submit" to="validate" />
+	</view-state>
+
+	<action-state id="validate">
+		<evaluate expression="shippinghandler.validateDetails(ship,messageContext)"></evaluate>
+
+		<transition on="success" to="confirmDetails" />
+		<transition on="failure" to="start" />
+	</action-state>
+
+	<view-state id="confirmDetails" view="confirmship.jsp"
+		model="flowScope.ship">
+		<transition on="edit" to="start" />
+		<transition on="submit" to="database" />
+	</view-state>
+<!-- 	 <view-state id="payment" view="payment" model="flowScope.ship"> -->
+<!-- 		<transition on="submit" to="payment" /> -->
+<!-- 	</view-state>  -->
+
+	<action-state id="database"> 
+		<evaluate expression="shippinghandler.ship(ship)"></evaluate> 
+		<transition on="success" to="payment" /> 
+		<transition on="failure" to="start" /> 
+ 	</action-state> 
+<end-state id="payment" view="payment.jsp" />
+	<end-state id="toHome" view="index.jsp" />
+	<end-state id="welcome" view="landing.jsp" />
+	<end-state id="toException"
+		view="externalRedirect:contextRelative:exception.jsp" />
+
+	<!-- these events are available in every state -->
+	<global-transitions>
+
+		<transition on="error" to="toException" />
+	</global-transitions>
+
+</flow>
